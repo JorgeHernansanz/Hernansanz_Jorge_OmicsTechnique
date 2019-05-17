@@ -1,0 +1,58 @@
+---
+title: "LAbo_1"
+author: "Jorge"
+date: "5/15/2019"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+## Introduction
+*Gene expression pattern of pulmonary CD11c+ cells from middle-aged and young mice.*
+
+*Expression profiling by array*
+
+## Summary
+*Analysis of function of CD11c+ cells from middle-aged and young mice at gene level. This experiment provided insight into the different genes that plays roles in inflammation, immune response and mainly arachidonic acid cascade that are differentiall expressed in CD11c+ cells from middle aged and young mice.*
+
+## Experimental design
+*Total RNA was isolated from pulmonary CD11c cells (separated using magnetic beads) from middle-aged and young mice*
+
+## Citations
+*Vijay R, Hua X, Meyerholz DK, Miki Y et al. Critical role of phospholipase A2 group IID in age-related susceptibility to severe acute respiratory syndrome-CoV infection. J Exp Med 2015 Oct 19;212(11):1851-68. PMID: 26392224*
+
+#Data descriptions#
+*Eight samples of mice; 4 from middle-age and 4 from young mice. Two groups*
+
+```{r READTARGETS}
+targets<- read.table("targets.txt")
+```
+
+
+```{r READTARGETS}
+Expression<- read.delim("Expression.txt")
+
+```
+
+```{r}
+show(targets)
+```
+```{r}
+dim(Expression)
+summary(Expression)
+```
+```{r}
+boxplot(Expression)# THe system need to know that the first row is not a variable. Do it with import
+
+#Color the boxes based on the groups
+#boxplot(expressions, col=c(2,2,2,3,3,3,4,4,4,4,...))
+
+# You can also create a colum of colors with numbers and put
+# boxplot(expressions, col=targets$Color) 
+```
+

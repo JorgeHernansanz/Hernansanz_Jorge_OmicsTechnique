@@ -1,0 +1,11 @@
+
+"ID"	"GROUP"	"SAMPLE"
+GSM1847063	Middle_aged	1.1
+GSM1847064	Middle_aged	2.1
+GSM1847065	Middle_aged	3.1
+GSM1847066	Middle_aged	4.1
+GSM1847067	Middle_aged	1.2
+GSM1847068	Middle_aged	2.2
+GSM1847069	Middle_aged	3.2
+GSM1847070	Middle_aged	4.2
+
