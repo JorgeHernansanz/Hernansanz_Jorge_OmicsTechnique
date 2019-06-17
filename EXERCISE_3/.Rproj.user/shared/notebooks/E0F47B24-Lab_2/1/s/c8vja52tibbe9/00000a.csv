@@ -1,0 +1,1 @@
+"0","second_comparison <- topTable (fit.main, number=nrow(fit.main), coef=""diff2"", adjust=""fdr""); head(second_comparison[1:5])"

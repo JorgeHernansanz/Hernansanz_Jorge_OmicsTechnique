@@ -1,0 +1,4 @@
+"0","My_expression_set <- ExpressionSet(assayData=expres,"
+"0","                            phenoData = phenoData)"
+"2","Error: ExpressionSet 'phenoData' is class 'standardGeneric' but should be or extend 'AnnotatedDataFrame'
+"

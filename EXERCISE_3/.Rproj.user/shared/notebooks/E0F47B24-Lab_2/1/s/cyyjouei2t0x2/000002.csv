@@ -1,0 +1,153 @@
+"0","CELfiles <- list.celfiles(file.path(""./Data/Cell_files""),full.names=TRUE)"
+"0","data_CEL=read.celfiles(CELfiles)"
+"2","Platform design info loaded.
+"
+"1","Reading in : ./Data/Cell_files/GSM1970196_80S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970197_80D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970198_88S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970199_89S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970200_89D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970201_90S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970202_90D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970203_91S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970204_91D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970205_92S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970206_92D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970207_94S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970208_94D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970209_112S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970210_112D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970211_113S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970212_113D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970213_115S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970214_115D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970215_117S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970216_117D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970217_128S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970218_128D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970219_129S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970220_129D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970221_134S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970222_134D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970223_136S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970224_136D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970225_149S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970226_149D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970227_153S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970228_153D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970229_154S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970230_154D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970231_155S.CEL
+"
+"0","my_targets<- read.AnnotatedDataFrame(file.path(""./Data/Targets.txt""),header=TRUE, row.names = 1, sep = ""\t"")"
+"0","rawData <- read.celfiles(CELfiles, phenoData = my_targets)"
+"2","Platform design info loaded.
+"
+"1","Reading in : ./Data/Cell_files/GSM1970196_80S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970197_80D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970198_88S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970199_89S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970200_89D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970201_90S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970202_90D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970203_91S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970204_91D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970205_92S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970206_92D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970207_94S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970208_94D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970209_112S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970210_112D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970211_113S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970212_113D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970213_115S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970214_115D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970215_117S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970216_117D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970217_128S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970218_128D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970219_129S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970220_129D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970221_134S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970222_134D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970223_136S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970224_136D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970225_149S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970226_149D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970227_153S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970228_153D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970229_154S.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970230_154D.CEL
+"
+"1","Reading in : ./Data/Cell_files/GSM1970231_155S.CEL
+"
+"2","'channel' automatically added to varMetadata in phenoData."

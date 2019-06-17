@@ -1,0 +1,8 @@
+"0","samplenames <- letters[1:10]"
+"0","dataf <- data.frame(treated=sample(c(TRUE, FALSE), 10, replace=TRUE),"
+"0","  sex=sample(c(""Male"", ""Female""), 10, replace=TRUE),"
+"0","  mood=sample(c(""Happy"", ""Dontt care"", ""Grumpy""), 10,replace=TRUE),"
+"0","  names=samplenames, row.names=""names"")"
+"0","dataDesc = data.frame(c(""TReated with dark chocolate"",""Sex"",""Mood while eating""))"
+"0",""
+"0","pdata <- new(""AnnotatedDataFrame"", data=dataf, dataDesc)"

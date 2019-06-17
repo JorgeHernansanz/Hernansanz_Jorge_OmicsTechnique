@@ -1,0 +1,119 @@
+---
+title: "Exercise_2"
+author: "Jorge"
+date: "6/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(oligo)
+require(Biobase)
+require(arrayQualityMetrics)
+require(genefilter)
+require(Biobase)
+require(hgu219.db)
+require(limma)
+require(gplots)
+require(ReactomePA)
+```
+
+```{r, targets}
+targets <-read.table("./Data/Targets.txt", header = TRUE, sep="\t") 
+#targets
+summary(targets[2:5])
+```  
+
+```{r, expression_data}
+CELfiles <- list.celfiles(file.path("./Data/Cell_files"),full.names=TRUE)
+data_CEL=read.celfiles(CELfiles)
+my_targets<- read.AnnotatedDataFrame(file.path("./Data/Targets.txt"),header=TRUE, row.names = 1, sep = "\t")
+rawData <- read.celfiles(CELfiles, phenoData = my_targets)
+```
+
+
+```{r, dEFINE SOME VARIABLES FOR PLOTS}
+
+sampleNames <- as.character(targets$SHORT_NAME)
+sampleColor <- as.character(targets$COLORS)
+IDs <- as.character(targets$ID)
+#sampleNames
+#sampleColor
+#IDs
+```
+
+
+```{r}
+eset <- rma(rawData)
+```
+
+
+```{r}
+annotation(eset) <- 'hgu219.db'
+filter <- nsFilter(eset, var.func=IQR,
+         var.cutoff=0.75, var.filter=TRUE,
+         filterByQuantile=TRUE)
+eset_filtered <- filter$eset
+eset_filtered
+```
+
+
+```{r, DESIGNMATRIX}
+names_fac <- factor(sampleNames, levels = unique(sampleNames))
+#names_fac
+
+design_matrix <- model.matrix(~0+names_fac, pData(eset_filtered))
+colnames(design_matrix)<- colnames(design_matrix)<- c('E_UC','dE_UC','E_NC','dE_NC')
+rownames(design_matrix)<- rownames(design_matrix)<- IDs
+design_matrix
+
+```
+
+*  In our case, we want to focus in three basic comparisons:
+    +  *UC* and *NC* patients of the group of the normal epoc (*E_*).
+    +  *UC* and *NC* patients of the group of the differenciated epoc (*dE_*).
+    +  Check interaction between the type of patient and the type of epoc.
+
+```{r contrastsMatrix}
+cont.matrix <- makeContrasts (
+  diff1 = E_UC - E_NC,
+  diff2 = dE_UC - dE_NC,
+  diff3 = (E_UC - E_NC) - (dE_UC - dE_NC),
+  levels=design_matrix)
+cont.matrix
+```
+
+
+```{r fitModel}
+fit<-lmFit (eset_filtered,design_matrix)
+fit.main<-contrasts.fit(fit, cont.matrix)
+fit.main<-eBayes(fit.main)
+```
+
+
+```{r extractResults}
+first_comparison <- topTable (fit.main, number=nrow(fit.main), coef="diff1", adjust="fdr"); head(first_comparison[1:5])
+second_comparison <- topTable (fit.main, number=nrow(fit.main), coef="diff2", adjust="fdr"); head(second_comparison[1:5])
+third_comparison <- topTable(fit.main, number=nrow(fit.main), coef="diff3", adjust="fdr"); head(third_comparison[1:5])
+```
+
+```{r, Gene_annotation}
+
+annotatedTopTable <- function(topTab, anotPackage)
+  {
+    topTab<-cbind(PROBEID=rownames(topTab), topTab)
+    myprobes <- rownames(topTab)
+    thePackage <- eval(parse(text=anotPackage))
+    geneAnots <- select(thePackage, myprobes, c('SYMBOL','ENTREZID','GENENAME'))
+    annotatedTopTab <- merge (x=geneAnots, y = topTab, by.x='PROBEID', by.y='PROBEID')
+    return (annotatedTopTab)
+}
+
+topAnnotated_diff1_ <- annotatedTopTable(first_comparison[1:10,1:5], anotPackage = "hgu219.db"); head(topAnnotated_diff1_)
+topAnnotated_diff2_ <- annotatedTopTable(second_comparison[1:10,1:5], anotPackage = "hgu219.db"); head(topAnnotated_diff2_)
+topAnnotated_diff3_ <- annotatedTopTable(third_comparison[1:10,1:5],anotPackage = "hgu219.db"); head(topAnnotated_diff3_)
+```

@@ -1,0 +1,6 @@
+"0","workingDir <-getwd()"
+"0","dataDir <- file.path(workingDir, ""Data"")"
+"0","resultsDir <- file.path(workingDir, ""Results"")"
+"0","setwd(resultsDir)"
+"2","Error in setwd(resultsDir) : cannot change working directory
+"

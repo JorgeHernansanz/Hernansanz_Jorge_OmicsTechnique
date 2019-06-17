@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1560795358869.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1739259503",
+    "id" : "863DDAE4",
+    "lastKnownWriteTime" : 1560795568,
+    "last_content_update" : 1560795568,
+    "path" : "~/Desktop/Omic_techniques/Hernansanz_Jorge_OmicsTechnique/EXERCISE_3/Lab_3.Rmd",
+    "project_path" : "Lab_3.Rmd",
+    "properties" : {
+        "cursorPosition" : "466,2",
+        "last_setup_crc32" : "",
+        "scrollLine" : "433"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

@@ -1,0 +1,5 @@
+"0","phenoData <- new(""AnnotatedDataFrame"", data=pData, metadata)"
+"2","Error in value[[3L]](cond) : invalid 'row.names' length
+  AnnotatedDataFrame 'initialize' could not update varMetadata:
+  perhaps pData and varMetadata are inconsistent?
+"

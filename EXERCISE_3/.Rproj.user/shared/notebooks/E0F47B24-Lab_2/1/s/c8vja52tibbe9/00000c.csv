@@ -1,0 +1,1 @@
+"0","third_comparison <- topTable(fit.main, number=nrow(fit.main), coef=""diff3"", adjust=""fdr""); head(third_comparison[1:5])"

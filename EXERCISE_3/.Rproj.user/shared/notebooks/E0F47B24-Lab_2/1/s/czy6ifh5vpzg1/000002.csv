@@ -1,0 +1,3 @@
+"0","fit<-lmFit (eset_filtered,design_matrix)"
+"0","fit.main<-contrasts.fit(fit, cont.matrix)"
+"0","fit.main<-eBayes(fit.main)"

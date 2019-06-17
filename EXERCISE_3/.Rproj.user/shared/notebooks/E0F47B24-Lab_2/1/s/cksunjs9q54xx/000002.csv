@@ -1,0 +1,7 @@
+"0",""
+"0","sampleNames <- as.character(targets$SHORT_NAME)"
+"0","sampleColor <- as.character(targets$COLORS)"
+"0","IDs <- as.character(targets$ID)"
+"0","#sampleNames"
+"0","#sampleColor"
+"0","#IDs"

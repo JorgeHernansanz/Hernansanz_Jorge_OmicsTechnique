@@ -1,0 +1,469 @@
+---
+title: "Expression data of epithelial organoid cultures generated from intestinal mucosa of non-IBD controls and patients with ulcerative colitis"
+author: "Jorge_Hernansanz; 103631"
+date: "5/29/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(oligo)
+require(Biobase)
+require(arrayQualityMetrics)
+require(genefilter)
+require(Biobase)
+require(hgu219.db)
+require(limma)
+require(gplots)
+require(ReactomePA)
+```
+
+## SUMMARY
+The transcriptional signature of mucosa of patients with ulcerative colitis (UC) in remission reveals long-lasting changes in the epithelial barrier which persist once the inflammatory response has resolved. In order to investigate if these changes are caused by primary defects in the epithelial cells, we generated in vitro epithelial organoid cultures (EpOCs) from colon samples of non-IBD controls and UC patients.
+
+After induction of differentiation, total RNA was extracted from both EpOCs and differentiated EpOCs (d-EpOCs) and used for hybridization on Affymetrix microarray.
+
+
+## EXPERIMENTAL DESIGN
+Colon samples from non-IBD controls and UC patients were collected. Both surgical and biopsy samples for non-IBD controls, and only biopsy samples for UC patients, were considered. Non-IBD controls were those subjects undergoing surgery for colorectal cancer, colonoscopy for mild gastrointestinal symptoms, or a screening for CRC and who presented no lesions during examination. 
+
+Inclusion criteria for UC patients at the time of colonoscopy were: age between 18 and 80, diagnosis at least 5 years before inclusion, and exclusion of colitis-associated dysplasia or neoplasia. Endoscopic activity of UC at the time of colonoscopy was categorized according to the Mayo endoscopy subscore. Active disease was defined as Mayo endoscopic subscore of ≥1; quiescent disease was defined as a Mayo score of 0. Only samples from UC patients with inactive or mildly active disease were included in the generation of epithelial organoid cultures (EpOCs). Once expanded, EpOCs were induced to differentiate into the different epithelial lineages (d-EpOCs). 
+
+Finally, a total of 19 human samples were analysed: 11 from non-IBD controls and 8 from UC patients. From these samples 19 EpOCs and 17 d-EpOCs were generated. RNA was then extracted and used for hybridization on Affymetrix microarrays.
+
+
+## WORKFLOW
+# **1. Loading expression and targets data. Setting variables for quick access to target variables.**
+**1.1**
+
+Setting working directory 
+```{r}
+workingDir <-getwd()
+```
+
+**1.2**
+
+Reading targets of our analysis. There are four groups, which are each one identified in the slot of *SHORT_NAME* and that are also associated to a color (*COLORS*), each one. 
+```{r}
+targets <-read.table("./Data/Targets.txt", header = TRUE, sep="\t") 
+#targets
+summary(targets[2:5])
+```  
+
+```{r, include=FALSE}
+CELfiles <- list.celfiles(file.path("./Data/Cell_files"),full.names=TRUE)
+data_CEL=read.celfiles(CELfiles)
+my_targets<- read.AnnotatedDataFrame(file.path("./Data/Targets.txt"),header=TRUE, row.names = 1, sep = "\t")
+rawData <- read.celfiles(CELfiles, phenoData = my_targets)
+```
+
+**1.3**
+
+We import the expression values of each of the samples with our *CELfiles*. In order to use this data for a quality analysis of the *raw data*, we will convert it to a expression set.
+```{r}
+#CELfiles <- list.celfiles(file.path("./Data/Cell_files"),full.names=TRUE)
+
+#data_CEL=read.celfiles(CELfiles)
+
+#my_targets<- read.AnnotatedDataFrame(file.path("./Data/Targets.txt"),header=TRUE, row.names = 1, sep = "\t")
+
+#rawData <- read.celfiles(CELfiles, phenoData = my_targets)
+rawData
+
+```
+
+**1.4**
+
+In order to be more efficient when interacting with the *Targets.txt*, we create some short_cuts to its different slots.
+```{r, dEFINE SOME VARIABLES FOR PLOTS}
+
+sampleNames <- as.character(targets$SHORT_NAME)
+sampleColor <- as.character(targets$COLORS)
+IDs <- as.character(targets$ID)
+#sampleNames
+#sampleColor
+#IDs
+```
+
+# **2. Quality control of arrays; Raw data**
+**2.1**
+
+With the expression set, we perform some analysis with the ArrayQualityMetrics
+package in order to check if we have a bad quality of raw data in order to normalize it.
+```{r}
+#arrayQualityMetrics(rawData, outdir = file.path("./Results/QCdir.raw"), force=TRUE)
+```
+Also, we can do this analysis in a more manual way. For example, we can make a *boxplot* and a principal component analysis (*PCA*).
+```{r, BOXPLOT,PCA}
+
+boxplot(rawData, which="all",las=2, main="Intensity distribution of RAW data", 
+        cex.axis=0.6, col=sampleColor, names=sampleNames)
+
+
+
+plotPCA <- function ( X, labels=NULL, colors=NULL, dataDesc="", scale=FALSE, formapunts=NULL, myCex=0.8,...)
+{
+  pcX<-prcomp(t(X), scale=scale) # o prcomp(t(X))
+  loads<- round(pcX$sdev^2/sum(pcX$sdev^2)*100,1)
+  xlab<-c(paste("PC1",loads[1],"%"))
+  ylab<-c(paste("PC2",loads[2],"%"))
+  if (is.null(colors)) colors=1
+  plot(pcX$x[,1:2],xlab=xlab,ylab=ylab, col=colors, pch=formapunts, 
+       xlim=c(min(pcX$x[,1])-100000, max(pcX$x[,1])+100000),ylim=c(min(pcX$x[,2])-100000, max(pcX$x[,2])+100000))
+  text(pcX$x[,1],pcX$x[,2], labels, pos=3, cex=myCex)
+  title(paste("Plot of first 2 PCs for expressions in", dataDesc, sep=" "), cex=0.8)
+}
+
+plotPCA(exprs(rawData), labels=sampleNames, dataDesc="raw data", colors=sampleColor,
+        formapunts=c(rep(16,4),rep(17,4)), myCex=0.6)
+```
+
+Here, we can see tha the raw data explains nearly the 50% of the variability of the data. Also, it can be clearly seen that the variability comes from the type of epoc, as there can be seen more or less two clusters differenciated from this variable.
+
+```{r, HIERARQUICAL CLUSTERING, include=FALSE}
+
+clust.euclid.average <- hclust(dist(t(exprs(rawData))),method="average")
+plot(clust.euclid.average, labels=sampleNames, main="Hierarchical clustering of RawData", cex=0.7,  hang=-1)
+```
+
+
+# **3. Quality control of arrays; Normalized data**
+**3.1**
+
+Here, we normalized the data in oder to eliminate all variance that is not associated to biological reasons. In this way, we can compare the samples with the certainty of reflecting the differential expression of genes an not any biased artifacts.
+```{r,include=FALSE}
+eset <- rma(rawData)
+```
+
+```{r}
+#eset <- rma(rawData)
+eset
+```
+**3.2**
+
+Also, we can do again a quality control in the same way than with the raw data. We will use the same package to perform the complete analysis, and we will code manually the boxpllot and the PCA and give brief comments from these last results.
+```{r}
+#arrayQualityMetrics(eset, outdir = file.path("./Results/QCdir.norm"), force=TRUE)
+```
+
+```{r}
+boxplot(eset, which="all",las=2, main="Intensity distribution of NORM data",cex.axis=0.6, col=sampleColor, names=sampleNames)
+
+
+plotPCA <- function ( X, labels=NULL, colors=NULL, dataDesc="",
+scale=FALSE, formapunts=NULL, myCex=0.8,...)
+{
+  pcX<-prcomp(t(X), scale=scale) # o prcomp(t(X))
+  loads<- round(pcX$sdev^2/sum(pcX$sdev^2)*100,1)
+  xlab<-c(paste("PC1",loads[1],"%"))
+  ylab<-c(paste("PC2",loads[2],"%"))
+  if (is.null(colors)) colors=1
+  plot(pcX$x[,1:2],xlab=xlab,ylab=ylab, col=colors, pch=formapunts, 
+       xlim=c(min(pcX$x[,1])-100, max(pcX$x[,1])+100),ylim=c(min(pcX$x[,2])-100, max(pcX$x[,2])+100))
+  text(pcX$x[,1],pcX$x[,2], labels, pos=3, cex=myCex)
+  title(paste("Plot of first 2 PCs for expressions in", dataDesc, sep=" "), cex=0.8)
+}
+
+plotPCA(exprs(eset), labels=sampleNames, dataDesc="Norm data", colors=sampleColor,
+        formapunts=c(rep(16,4),rep(17,4)), myCex=0.6)
+```
+
+*  Taking a look at the boxplot, we can see that the intensity distribution of the arrays has the same aspects. This is an indication that the normalization has been done properly.
+*  Looking at the PCA, we see that it can measure 55.5% of the variability of the variability of the samples. Also, the variability is mainly contributed because of the type of epoc.
+
+## **4. Filtering data**
+**4.1**
+
+This is a brief step where we look for the genes that are not supposed to be differentially expresed.
+By this way, we will work in a more efficient way with the differential analysis.
+```{r}
+annotation(eset) <- 'hgu219.db'
+filter <- nsFilter(eset, var.func=IQR,
+         var.cutoff=0.75, var.filter=TRUE,
+         filterByQuantile=TRUE)
+eset_filtered <- filter$eset
+eset_filtered
+```
+
+
+
+# **5. Identification of differential expressed genes**
+**5.1**
+
+In this step we will be comparing gene expression between groups. For it, we will design a marix that will store, with binary option, the group that each sample belongs to.
+```{r, DESIGNMATRIX}
+names_fac <- factor(sampleNames, levels = unique(sampleNames))
+#names_fac
+
+design_matrix <- model.matrix(~0+names_fac, pData(eset_filtered))
+colnames(design_matrix)<- colnames(design_matrix)<- c('E_UC','dE_UC','E_NC','dE_NC')
+rownames(design_matrix)<- rownames(design_matrix)<- IDs
+design_matrix
+
+```
+
+**5.2**
+
+*  After, with the matrix created, we will decide the different analysis that we want to perform. It means, we stablish how many analysis of differential expression we will be doing between our groups.
+*  In our case, we want to focus in three basic comparisons:
+    +  *UC* and *NC* patients of the group of the normal epoc (*E_*).
+    +  *UC* and *NC* patients of the group of the differenciated epoc (*dE_*).
+    +  Check interaction between the type of patient and the type of epoc.
+```{r contrastsMatrix}
+cont.matrix <- makeContrasts (
+  diff1 = E_UC - E_NC,
+  diff2 = dE_UC - dE_NC,
+  diff3 = (E_UC - E_NC) - (dE_UC - dE_NC),
+  levels=design_matrix)
+cont.matrix
+```
+
+When having clear the comparisons we want to perform, we will use linear models and the bayes estimation so to find the most differential genes for each compaprison.
+```{r fitModel}
+fit<-lmFit (eset_filtered,design_matrix)
+fit.main<-contrasts.fit(fit, cont.matrix)
+fit.main<-eBayes(fit.main)
+```
+
+
+```{r extractResults}
+first_comparison <- topTable (fit.main, number=nrow(fit.main), coef="diff1", adjust="fdr"); head(first_comparison[1:5])
+second_comparison <- topTable (fit.main, number=nrow(fit.main), coef="diff2", adjust="fdr"); head(second_comparison[1:5])
+third_comparison <- topTable(fit.main, number=nrow(fit.main), coef="diff3", adjust="fdr"); head(third_comparison[1:5])
+```
+
+**5.3**
+
+Also, we can use the toolkit of volcano's plot. This one allows us to see, in a graphic way, the most differential genes according to its biological and statistical significance.
+
+```{r}
+volcanoplot(fit.main, coef="diff1", highlight=10, main=paste('Differentially expressed genes \n E_UC and E_NC'))
+```
+
+*  The log10 is used to allow expressing p-value with very low scores. In this case, the highest score the dot has in the *y* axis, the more statistical significancan it will be.
+*  If we want to look the biological significance, we must follow the *x* axis. This means, the furthest the dot is from the 0, the more biological significant it will be. It is interesting to see the shape of the volcanos, where there's hardly no dot in the middle of the plot. This is because of the filtering we have carried on before in which we have wiped out all the genes that were not biologically significant.
+
+
+```{r}
+volcanoplot(fit.main, coef="diff2", highlight=10,main=paste('Differentially expressed genes \n dE_UC and dE_NC'))
+```
+
+* In this second comparison we observe that there's a proportion of genes with more both biological and staistical significance. This is something that was to be expected, as we are analysing the group of differenciated epoc.
+
+```{r}
+volcanoplot(fit.main, coef="diff3", highlight=10,main=paste('Diff. expr. genes \n type of ePoc (E, dE) and type of patient (UC, NC)'))
+```
+
+*  In this one, we see that, compared to the other two analysis, this one has much less biological and statistical signifannce. This may mean that, in reality, there's not to much interaction or impact between type of epoc and type of patient. 
+
+# **6. Gene annotation**
+**6.1**
+
+When having our lists of most differntial genes for each comparison, we will use this function that, from a database of affimetric arrays where all the probeID of this analysis are stored, will recognize each *PROBEID* of the top differentiable expression data of each group, and assigned its *ENTREZID* and *GENENAME*. For this experiment, the database is from a human one called *HGU219*.
+```{r, include=FALSE}
+
+annotatedTopTable <- function(topTab, anotPackage)
+  {
+    topTab<-cbind(PROBEID=rownames(topTab), topTab)
+    myprobes <- rownames(topTab)
+    thePackage <- eval(parse(text=anotPackage))
+    geneAnots <- select(thePackage, myprobes, c('SYMBOL','ENTREZID','GENENAME'))
+    annotatedTopTab <- merge (x=geneAnots, y = topTab, by.x='PROBEID', by.y='PROBEID')
+    return (annotatedTopTab)
+}
+
+topAnnotated_diff1 <- annotatedTopTable(first_comparison, anotPackage = "hgu219.db"); head(topAnnotated_diff1)
+topAnnotated_diff2 <- annotatedTopTable(second_comparison, anotPackage = "hgu219.db"); head(topAnnotated_diff2)
+topAnnotated_diff3 <- annotatedTopTable(third_comparison, anotPackage = "hgu219.db"); head(topAnnotated_diff3)
+
+topAnnotated_diff1_ <- annotatedTopTable(first_comparison[1:10,1:5], anotPackage = "hgu219.db"); head(topAnnotated_diff1_)
+topAnnotated_diff2_ <- annotatedTopTable(second_comparison[1:10,1:5], anotPackage = "hgu219.db"); head(topAnnotated_diff2_)
+topAnnotated_diff3_ <- annotatedTopTable(third_comparison[1:10,1:5],anotPackage = "hgu219.db"); head(topAnnotated_diff3_)
+```
+
+```{r}
+
+annotatedTopTable <- function(topTab, anotPackage)
+  {
+    topTab<-cbind(PROBEID=rownames(topTab), topTab)
+    myprobes <- rownames(topTab)
+    thePackage <- eval(parse(text=anotPackage))
+    geneAnots <- select(thePackage, myprobes, c('SYMBOL','ENTREZID','GENENAME'))
+    annotatedTopTab <- merge (x=geneAnots, y = topTab, by.x='PROBEID', by.y='PROBEID')
+    return (annotatedTopTab)
+  }
+
+#topAnnotated_diff1 <- annotatedTopTable(first_comparison[0], anotPackage = "hgu219.db")
+head(topAnnotated_diff1_[1:4])
+#topAnnotated_diff2 <- annotatedTopTable(second_comparison[0], anotPackage = "hgu219.db")
+head(topAnnotated_diff2_[1:4])
+#topAnnotated_diff3 <- annotatedTopTable(third_comparison[0], anotPackage = "hgu219.db")
+head(topAnnotated_diff3_[1:4])
+
+```
+
+
+# **7. Multiple comparisons (Venn's diagram, heatmaps)**
+**7.1**
+
+After otaining the most differentially expressed genes in each comparison, it is also a good approach to estimate which of those differential expressed genes are highlighted in two or more groups. 
+```{r}
+res <- decideTests(fit.main, method = 'separate', adjust.method='fdr', p.value=0.1, lfc = 1)
+
+sum.res.rows <- apply(abs(res),1,sum)
+res.selected <- res[sum.res.rows != 0,]
+print(summary(res))
+
+vennDiagram(res.selected[,1:3], cex=0.9)
+title("Genes in common between three comparisons \n genes selected with FDR <0.5 and log(LFC) <1")
+```
+In our case, taking a p-value =< 0,5 and a log(LFC) <1, we observe that it only takes genes significantly downregulated or upregulated from the first two groups. 
+
+  +  By the one hand, this would be expected as we saw that, according volcano plots, the impact of type of epoc and patient showed little statistical and biological significance. 
+  +  By the other hand, we see that not many genes are considered significant and, moreover, none of them are interacting in more than one group.
+
+**7.2**
+
+When, obtaining the selected genes that upregulate and downregulate, we can use the heatmap so to see graphically all the regulations with its intensity.  
+```{r, include=FALSE}
+probesInHeatmap <- rownames(res.selected)
+HMdata <- exprs(eset_filtered)[rownames(exprs(eset_filtered)) %in% probesInHeatmap,]
+
+geneSymbols <- select(hgu219.db, rownames(HMdata), c("SYMBOL"))
+SYMBOLS<- geneSymbols$SYMBOL
+rownames(HMdata) <- SYMBOLS
+write.csv(HMdata, file = file.path("./Results/data4Heatmap.csv"))
+```
+```{r}
+probesInHeatmap <- rownames(res.selected)
+HMdata <- exprs(eset_filtered)[rownames(exprs(eset_filtered)) %in% probesInHeatmap,]
+
+#geneSymbols <- select(hgu219.db, rownames(HMdata), c("SYMBOL"))
+SYMBOLS<- geneSymbols$SYMBOL
+rownames(HMdata) <- SYMBOLS
+write.csv(HMdata, file = file.path("./Results/data4Heatmap.csv"))
+```
+
+```{r}
+my_palette <- colorRampPalette(c("blue", "red"))(n = 299)
+
+heatmap.2(HMdata,
+          Rowv = TRUE,
+          Colv = TRUE,
+          main = "Differentially expressed genes \n FDR < 0,1, logFC >=1",
+          scale = "row",
+          col = my_palette,
+          sepcolor = "white",
+          sepwidth = c(0.05,0.05),
+          cexRow = 0.5,
+          cexCol = 0.9,
+          key = TRUE,
+          keysize = 1.5,
+          density.info = "histogram",
+          ColSideColors = c(sampleColor),
+          tracecol = NULL,
+          dendrogram = "both",
+          srtCol = 30)
+```
+
+# **8. Functional interpretations** 
+**8.1**
+
+Having obtained our differentially expressed genes, we want to interpret the results. For it, we want to ssek for the biological processes, metabolic pathways... that appears the most in each one of the comparisons. For it, we will put our three analysis within a list and, as for this kind of analysis we want to have a less restricted variables so to work with a reasonable number of genes, we will set the false discovery rate (*FDR*) to 0.15 and will no put any restriction to the fold-change (*LFC*).
+
+```{r}
+listOfTables <- list(diff1 = first_comparison, 
+                     diff2  = second_comparison, 
+                     diff3 = third_comparison)
+listOfSelected <- list()
+for (i in 1:length(listOfTables)){
+  # select the toptable
+  topTab <- listOfTables[[i]]
+  # select the genes to be included in the analysis
+  whichGenes<-topTab["adj.P.Val"]<0.5
+  selectedIDs <- rownames(topTab)[whichGenes]
+  # convert the ID to Entrez
+  EntrezIDs<- select(hgu219.db, selectedIDs, c("ENTREZID"))
+  EntrezIDs <- EntrezIDs$ENTREZID
+  listOfSelected[[i]] <- EntrezIDs
+  names(listOfSelected)[i] <- names(listOfTables)[i]
+}
+sapply(listOfSelected, length)
+
+```
+
+For our analysis we will only check this functional interpretation for the two first comparisons, as the volcano plot and Venn's diagram tells the third comparison is neither statistical nor biological significant. In order to have a reasonable number of genes, we are elevating the p-value cutoff to *<0.5*.
+
+```{r}
+EntrezUni <- c(topAnnotated_diff1$ENTREZID, topAnnotated_diff2$ENTREZID)
+
+
+listOfData <- listOfSelected[1:2]
+comparisonsNames <- names(listOfData)
+
+organisme <- "human"
+universe <- as.character(EntrezUni)
+
+for (i in 1:length(listOfData)){
+  data <- listOfData[[i]]
+  genesIn <- listOfSelected[[i]]
+  comparison <- comparisonsNames[i]
+  enrich.result <- enrichPathway(gene = genesIn,
+                                 pvalueCutoff = 0.5,
+                                 readable = T,
+                                 organism =  organisme,
+                                 universe = universe,
+                                 minGSSize = 5,
+                                 maxGSSize = 500,
+                                 pAdjustMethod = "BH")
+  
+  if (length(rownames(enrich.result@result)) != 0) {
+  write.csv(as.data.frame(enrich.result), 
+             file =paste0("./Results/","ReactomePA.Results.",comparison,".csv"), 
+             row.names = FALSE)
+  
+  pdf(file=paste0("./Results/","ReactomePABarplot.",comparison,".pdf"))
+    print(barplot(enrich.result, showCategory = 15, font.size = 4, 
+            title = paste0("Reactome Pathway Analysis for ", comparison,". Barplot")))
+  dev.off()
+  
+  pdf(file = paste0("./Results/","ReactomePAcnetplot.",comparison,".pdf"))
+    print(cnetplot(enrich.result, categorySize = "geneNum", schowCategory = 15, 
+         vertex.label.cex = 0.75))
+  dev.off()
+  }
+}
+```
+
+**8.2**
+
+For each one of the comparisons analysed, we will plot for it:
+
+  +  A data frame with a summary of the enriched pathways.
+  +  A bar plot with the best enriched pathways.
+  +  A plot with a network of the enriched pathways and the relation among the genes included.
+  
+
+Once completed the analysis, we can show the summary of the data frame and show the pathways more seen in the comparisons. 
+
+*  We can look for the ones with higher statistical significance
+
+
+```{r}
+Tab.react <- read.csv(file.path("./Results/ReactomePA.Results.diff1.csv"), 
+                       sep = ",", header = TRUE, row.names = 2)
+head(Tab.react[,3:4])
+
+
+Tab.react2 <- read.csv(file.path("./Results/ReactomePA.Results.diff2.csv"), 
+                       sep = ",", header = TRUE, row.names = 2)
+head(Tab.react2[,3:4])
+
+
+```
+
+
+* Looking to their functions, we can see that all of them refers to issues of inflamation, protection...   
+
+## CITATIONS
+Dotti I, Mora-Buch R, Ferrer-Picón E, Planell N et al. Alterations in the epithelial stem cell compartment could contribute to permanent changes in the mucosa of patients with ulcerative colitis. Gut 2017 Dec;66(12):2069-2079. PMID: 27803115

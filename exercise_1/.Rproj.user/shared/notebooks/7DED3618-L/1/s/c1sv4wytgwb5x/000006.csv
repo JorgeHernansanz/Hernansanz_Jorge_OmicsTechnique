@@ -1,0 +1,83 @@
+"0","library(GEOquery)"
+"0","gds <- getGEO(""GSE71868"")"
+"2","Found 1 file(s)
+"
+"2","GSE71868_series_matrix.txt.gz
+"
+"2","trying URL 'https://ftp.ncbi.nlm.nih.gov/geo/series/GSE71nnn/GSE71868/matrix/GSE71868_series_matrix.txt.gz'
+"
+"2","Content type 'application/x-gzip'"
+"2"," length 998938 bytes (975 KB)
+"
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","="
+"2","
+"
+"2","downloaded 975 KB
+
+"
+"2","Parsed with column specification:
+cols(
+  ID_REF = [31mcol_character()[39m,
+  GSM1847063 = [32mcol_double()[39m,
+  GSM1847064 = [32mcol_double()[39m,
+  GSM1847065 = [32mcol_double()[39m,
+  GSM1847066 = [32mcol_double()[39m,
+  GSM1847067 = [32mcol_double()[39m,
+  GSM1847068 = [32mcol_double()[39m,
+  GSM1847069 = [32mcol_double()[39m,
+  GSM1847070 = [32mcol_double()[39m
+)
+"
+"2","File stored at: 
+"
+"2","/tmp/RtmppsmtNA/GPL6885.soft
+"

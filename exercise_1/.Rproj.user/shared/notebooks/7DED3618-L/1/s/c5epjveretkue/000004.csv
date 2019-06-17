@@ -1,0 +1,7 @@
+"0","####import express matrix###  "
+"0","expres <- as.matrix(read.table(""Expression.txt"", header=TRUE, sep=""\t"", row.names=1, as.is=TRUE))"
+"0","class(expres)"
+"1","[1]"
+"1"," ""matrix"""
+"1","
+"
