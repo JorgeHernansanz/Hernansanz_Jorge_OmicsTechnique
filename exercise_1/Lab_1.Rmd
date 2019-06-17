@@ -1,0 +1,86 @@
+---
+title: "Lab_1.Rmd"
+author: "Jorge"
+date: "5/22/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Biobase)
+library(GEOquery)
+```
+
+## Creating expression sets
+
+```{r}
+expressionValues <- matrix (rnorm (300), nrow=30)
+#expressionValues
+
+myGenes<- paste0("genes",1:30)
+myGenes
+```
+
+```{r}
+workingDir <-getwd()
+dataDir <- file.path(workingDir, "Data")
+resultsDir <- file.path(workingDir, "Results")
+setwd(resultsDir)
+```
+
+*First, we will enter the expression data as a matrix*
+```{r Import expression matrix}
+####import express matrix###  
+expres <- as.matrix(read.table( file.path("Expression.txt"), header=TRUE, sep="\t", row.names=1, as.is=TRUE))
+class(expres)
+expres
+
+```
+
+*Then, we will import the phenotypic data, which is the one of the targets*
+```{r}
+pData <- read.table("Targets.txt", row.names=1, header=TRUE, sep="\t")
+pData
+dim(pData)
+
+summary(pData)
+```
+
+*After, we will include a label that will help us with the creation of the class Annotated Data Frame.*
+```{r}
+metadata <- data.frame(labelDescription=
+                         c("TYPE_OF_EPOC","TYPE_OF_PATIENT", "COLORS","SHORT_NAME"),
+                       row.names=c("TYPE_OF_EPOC","TYPE_OF_PATIENT",    "COLORS","SHORT_NAME"))
+pData
+metadata
+
+
+```
+
+
+*This is the creation of the class AnnotatedDataFrame*
+```{r}
+phenoData <- new("AnnotatedDataFrame", data=pData,varMetadata =metadata)
+phenoData
+
+```
+
+```{r}
+head(pData(phenoData))
+```
+
+*Here we are creating the class Expressionset. As minimum, we have to insert there the information of expression and the class of AnnotatedDataFrame that contains all the phenotypic data*
+```{r}
+My_expression_set <- ExpressionSet(assayData=expres,
+                            phenoData = phenoData)
+
+My_expression_set
+
+```
+
+*This is another way of downloading our packages of GEO without searching through the web*
+```{r}
+#library(GEOquery)
+#gds <- getGEO("GSE71868")
+
+```
